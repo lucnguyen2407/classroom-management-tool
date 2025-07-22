@@ -10,7 +10,8 @@ function AppRouter() {
     <Routes>
       <Route path="/" element={<SignIn />} />
       <Route path="/verify" element={<PhoneVerify />} />
-      <Route
+      <Route path="/instructor" element={<InstructorDashboard />} />
+      {/* <Route
         path="/instructor"
         element={
           <PrivateRoute
@@ -18,7 +19,7 @@ function AppRouter() {
             roleRequired="instructor"
           />
         }
-      />
+      /> */}
       <Route
         path="/student"
         element={

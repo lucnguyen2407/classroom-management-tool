@@ -2,14 +2,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Bell, User, Search, Plus } from "lucide-react";
+import { useState } from "react";
+import CreateStudentModal from "@/components/CreateStudent";
 
 function InstructorDashboard() {
-  const students = [
+  const [students, setStudents] = useState([
     { id: 1, name: "Student 1", email: "123@gmail.com", status: "Active" },
     { id: 2, name: "Student 2", email: "123@gmail.com", status: "Active" },
     { id: 3, name: "Student 3", email: "123@gmail.com", status: "Active" },
     { id: 4, name: "Student 4", email: "123@gmail.com", status: "Active" },
-  ];
+  ]);
+
+  const handleStudentCreated = (studentData: any) => {
+    // Add the new student to the list
+    const newStudent = {
+      id: students.length + 1,
+      name: studentData.studentName,
+      email: studentData.emailAddress,
+      status: "Active",
+    };
+    setStudents((prev: any) => [...prev, newStudent]);
+
+    // You can also make an API call here to save to backend
+    console.log("New student created:", studentData);
+  };
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -59,12 +75,11 @@ function InstructorDashboard() {
 
             {/* Header Actions */}
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-medium text-gray-900">4 Students</h2>
+              <h2 className="text-lg font-medium text-gray-900">
+                {students.length} Students
+              </h2>
               <div className="flex items-center gap-4">
-                <Button className="bg-blue-600 hover:bg-blue-700">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Student
-                </Button>
+                <CreateStudentModal onStudentCreated={handleStudentCreated} />
                 <div className="relative">
                   <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                   <Input placeholder="Filter" className="pl-10 w-48" />
