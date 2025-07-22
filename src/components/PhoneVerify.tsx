@@ -1,10 +1,47 @@
-import { useState } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { ArrowLeft } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "./ui/input-otp";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import axios from "axios";
+import { useForm } from "react-hook-form";
+
+interface IFormInput {
+  code: string;
+}
 
 function PhoneVerify() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const { register, handleSubmit, setValue } = useForm<IFormInput>();
+
+  const handleVerify = async (data: IFormInput) => {
+    setError("");
+    setLoading(true);
+    const phoneNumber = localStorage.getItem("phone");
+    try {
+      const res = await axios.post(
+        "http://localhost:4000/auth/verifyAccessCode",
+        {
+          phoneNumber: phoneNumber,
+          code: data.code,
+        }
+      );
+      // Lưu vào localStorage
+      localStorage.setItem("role", res.data.role);
+      // Redirect dashboard
+      if (res.data.role === "instructor") {
+        navigate("/instructor");
+      } else {
+        navigate("/student");
+      }
+    } catch (err: any) {
+      setError(err?.response?.data?.error || "Mã xác thực sai hoặc hết hạn!");
+    }
+    setLoading(false);
+  };
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -26,9 +63,9 @@ function PhoneVerify() {
             </p>
           </div>
 
-          <div className="space-y-4">
-            <InputOTP maxLength={6}>
-              <InputOTPGroup>
+          <form onSubmit={handleSubmit(handleVerify)} className="space-y-4">
+            <InputOTP maxLength={6} onChange={(code) => setValue("code", code)}>
+              <InputOTPGroup className="flex justify-center">
                 <InputOTPSlot index={0} />
                 <InputOTPSlot index={1} />
                 <InputOTPSlot index={2} />
@@ -38,10 +75,16 @@ function PhoneVerify() {
               </InputOTPGroup>
             </InputOTP>
 
-            <Button className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium">
+            <Button
+              type="submit"
+              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+              disabled={loading}>
               Next
             </Button>
-          </div>
+            {error && (
+              <p className="text-red-500 text-xs text-center">{error}</p>
+            )}
+          </form>
 
           <p className="text-center text-xs text-gray-400">
             passwordless authentication methods

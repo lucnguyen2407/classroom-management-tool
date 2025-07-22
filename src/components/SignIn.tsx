@@ -3,9 +3,43 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { ArrowLeft } from "lucide-react";
 import { Input } from "./ui/input";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import axios from "axios";
+
+interface IFormInput {
+  phoneNumber: string;
+  code: string;
+}
 
 function SignIn() {
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [step, setStep] = useState<"phone" | "verify">("phone");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm<IFormInput>();
+
+  const handleSendCode = async (data: IFormInput) => {
+    setError("");
+    setLoading(true);
+    try {
+      await axios.post("http://localhost:4000/auth/createAccessCode", {
+        phoneNumber: data.phoneNumber,
+      });
+      localStorage.setItem("phone", data.phoneNumber);
+      setValue("phoneNumber", data.phoneNumber); // Keep phoneNumber when switching steps
+      navigate("/verify");
+    } catch (err: any) {
+      setError(err?.response?.data?.error || "Không gửi được mã xác thực!");
+    }
+    setLoading(false);
+  };
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -20,27 +54,34 @@ function SignIn() {
         </CardHeader>
 
         <CardContent className="space-y-6">
+          <form onSubmit={handleSubmit(handleSendCode)} className="space-y-4">
+            <Input
+              type="tel"
+              placeholder="Your Phone Number"
+              {...register("phoneNumber", { required: true })}
+              className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+            />
+            {errors.phoneNumber && (
+              <p className="text-red-500 text-xs">
+                Vui lòng nhập số điện thoại!
+              </p>
+            )}
+            <Button
+              type="submit"
+              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium"
+              disabled={loading}>
+              Next
+            </Button>
+            {error && (
+              <p className="text-red-500 text-xs text-center">{error}</p>
+            )}
+          </form>
+
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-semibold text-gray-900">Sign In</h1>
             <p className="text-gray-500 text-sm">
               Please enter your phone to sign in
             </p>
-          </div>
-
-          <div className="space-y-4">
-            <Input
-              type="tel"
-              placeholder="Your Phone Number"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              className="h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-            />
-
-            <Button
-              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-medium"
-              disabled={!phoneNumber.trim()}>
-              Next
-            </Button>
           </div>
 
           <p className="text-center text-xs text-gray-400">

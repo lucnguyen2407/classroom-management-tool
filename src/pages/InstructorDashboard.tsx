@@ -1,9 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Bell, User, Search, Plus } from "lucide-react";
+import { Bell, User, Search, Settings, LogOut } from "lucide-react";
 import { useState } from "react";
 import CreateStudentModal from "@/components/CreateStudent";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useNavigate } from "react-router-dom";
 
 function InstructorDashboard() {
   const [students, setStudents] = useState([
@@ -12,6 +20,7 @@ function InstructorDashboard() {
     { id: 3, name: "Student 3", email: "123@gmail.com", status: "Active" },
     { id: 4, name: "Student 4", email: "123@gmail.com", status: "Active" },
   ]);
+  const navigate = useNavigate();
 
   const handleStudentCreated = (studentData: any) => {
     // Add the new student to the list
@@ -26,6 +35,12 @@ function InstructorDashboard() {
     // You can also make an API call here to save to backend
     console.log("New student created:", studentData);
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem("role");
+    localStorage.removeItem("phoneNumber");
+    navigate("/");
+  };
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -37,9 +52,30 @@ function InstructorDashboard() {
               <Bell className="h-5 w-5" />
               <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></span>
             </Button>
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <User className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-600"
+                  onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </header>
