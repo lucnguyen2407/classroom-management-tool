@@ -1,9 +1,4 @@
-"use client";
-
-import type React from "react";
-
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -11,50 +6,48 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import axios from "axios";
 import { Plus } from "lucide-react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+
+interface StudentData {
+  studentName: string;
+  phoneNumber: string;
+  emailAddress: string;
+  address?: string;
+  dateOfBirth: string;
+}
 
 interface CreateStudentModalProps {
-  onStudentCreated?: (studentData: any) => void;
+  onStudentCreated?: (studentData: StudentData) => void;
 }
 
 export default function CreateStudentModal({
   onStudentCreated,
 }: CreateStudentModalProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    studentName: "",
-    phoneNumber: "",
-    emailAddress: "",
-    role: "",
-    address: "",
-  });
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<StudentData>();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Call the callback function if provided
-    if (onStudentCreated) {
-      onStudentCreated(formData);
+  const onSubmit = async (data: StudentData) => {
+    try {
+      await axios.post("http://localhost:4000/instructor/addStudent", data);
+      if (onStudentCreated) onStudentCreated(data);
+      reset();
+      setIsModalOpen(false);
+    } catch (err: any) {
+      alert(
+        err?.response?.data?.error || "Có lỗi xảy ra, không thể tạo sinh viên!"
+      );
     }
-
-    // Reset form and close modal
-    setFormData({
-      studentName: "",
-      phoneNumber: "",
-      emailAddress: "",
-      role: "",
-      address: "",
-    });
-    setIsModalOpen(false);
   };
 
   return (
@@ -71,29 +64,33 @@ export default function CreateStudentModal({
             Create Student
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="studentName">Student Name</Label>
               <Input
                 id="studentName"
-                value={formData.studentName}
-                onChange={(e) =>
-                  handleInputChange("studentName", e.target.value)
-                }
+                {...register("studentName", { required: "Required" })}
                 placeholder=""
               />
+              {errors.studentName && (
+                <span className="text-xs text-red-500">
+                  {errors.studentName.message}
+                </span>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="phoneNumber">Phone Number</Label>
               <Input
                 id="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={(e) =>
-                  handleInputChange("phoneNumber", e.target.value)
-                }
+                {...register("phoneNumber", { required: "Required" })}
                 placeholder=""
               />
+              {errors.phoneNumber && (
+                <span className="text-xs text-red-500">
+                  {errors.phoneNumber.message}
+                </span>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -102,36 +99,39 @@ export default function CreateStudentModal({
               <Input
                 id="emailAddress"
                 type="email"
-                value={formData.emailAddress}
-                onChange={(e) =>
-                  handleInputChange("emailAddress", e.target.value)
-                }
+                {...register("emailAddress", { required: "Required" })}
                 placeholder=""
               />
+              {errors.emailAddress && (
+                <span className="text-xs text-red-500">
+                  {errors.emailAddress.message}
+                </span>
+              )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
+              <Label htmlFor="dateOfBirth">Date of Birth</Label>
               <Input
-                id="role"
-                value={formData.role}
-                onChange={(e) => handleInputChange("role", e.target.value)}
+                id="dateOfBirth"
+                type="date"
+                {...register("dateOfBirth", { required: "Required" })}
                 placeholder=""
               />
+              {errors.dateOfBirth && (
+                <span className="text-xs text-red-500">
+                  {errors.dateOfBirth.message}
+                </span>
+              )}
             </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="address">Address</Label>
-            <Input
-              id="address"
-              value={formData.address}
-              onChange={(e) => handleInputChange("address", e.target.value)}
-              placeholder=""
-            />
+            <Input id="address" {...register("address")} placeholder="" />
           </div>
           <div className="flex justify-end pt-4">
             <Button
               type="submit"
-              className="bg-blue-600 hover:bg-blue-700 px-8">
+              className="bg-blue-600 hover:bg-blue-700 px-8"
+              disabled={isSubmitting}>
               Create
             </Button>
           </div>

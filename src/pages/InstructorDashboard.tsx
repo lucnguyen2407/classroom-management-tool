@@ -2,7 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Bell, User, Search, Settings, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import CreateStudentModal from "@/components/CreateStudent";
 import {
   DropdownMenu,
@@ -12,28 +13,47 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
+import { getInstructorStudents } from "@/services/api"; // Thêm dòng này
+
+interface Student {
+  id: string;
+  studentName: string;
+  emailAddress: string;
+  status: string;
+  // các trường khác nếu cần
+}
 
 function InstructorDashboard() {
-  const [students, setStudents] = useState([
-    { id: 1, name: "Student 1", email: "123@gmail.com", status: "Active" },
-    { id: 2, name: "Student 2", email: "123@gmail.com", status: "Active" },
-    { id: 3, name: "Student 3", email: "123@gmail.com", status: "Active" },
-    { id: 4, name: "Student 4", email: "123@gmail.com", status: "Active" },
-  ]);
+  const [students, setStudents] = useState<Student[]>([]);
   const navigate = useNavigate();
 
-  const handleStudentCreated = (studentData: any) => {
-    // Add the new student to the list
-    const newStudent = {
-      id: students.length + 1,
-      name: studentData.studentName,
-      email: studentData.emailAddress,
-      status: "Active",
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const res = await getInstructorStudents();
+        setStudents(res.data);
+      } catch (err) {
+        console.error("Failed to fetch students", err);
+      }
     };
-    setStudents((prev: any) => [...prev, newStudent]);
+    fetchStudents();
+  }, []);
 
-    // You can also make an API call here to save to backend
-    console.log("New student created:", studentData);
+  const handleStudentCreated = (studentData: {
+    studentName: string;
+    emailAddress: string;
+    // các trường khác nếu cần
+  }) => {
+    // Sau khi thêm mới, gọi lại fetchStudents hoặc thêm vào state nếu muốn realtime
+    setStudents((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        studentName: studentData.studentName,
+        emailAddress: studentData.emailAddress,
+        status: "Active",
+      },
+    ]);
   };
 
   const handleLogout = () => {
@@ -146,10 +166,10 @@ function InstructorDashboard() {
                   {students.map((student) => (
                     <tr key={student.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {student.name}
+                        {student.studentName}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                        {student.email}
+                        {student.emailAddress}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
