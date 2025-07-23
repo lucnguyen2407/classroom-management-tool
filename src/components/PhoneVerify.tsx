@@ -1,11 +1,11 @@
+import { verifyAccessCode } from "@/services/api";
+import { ArrowLeft } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader } from "./ui/card";
-import { ArrowLeft } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "./ui/input-otp";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import axios from "axios";
-import { useForm } from "react-hook-form";
 
 interface IFormInput {
   code: string;
@@ -20,15 +20,9 @@ function PhoneVerify() {
   const handleVerify = async (data: IFormInput) => {
     setError("");
     setLoading(true);
-    const phoneNumber = localStorage.getItem("phone");
+    const phoneNumber = localStorage.getItem("phone") ?? "";
     try {
-      const res = await axios.post(
-        "http://localhost:4000/auth/verifyAccessCode",
-        {
-          phoneNumber: phoneNumber,
-          code: data.code,
-        }
-      );
+      const res = await verifyAccessCode({ phoneNumber, code: data.code });
       // Lưu vào localStorage
       localStorage.setItem("role", res.data.role);
       // Redirect dashboard

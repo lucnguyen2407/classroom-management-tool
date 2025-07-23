@@ -6,6 +6,7 @@ import { Input } from "./ui/input";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import axios from "axios";
+import { createAccessCode } from "@/services/api";
 
 interface IFormInput {
   phoneNumber: string;
@@ -29,9 +30,7 @@ function SignIn() {
     setError("");
     setLoading(true);
     try {
-      await axios.post("http://localhost:4000/auth/createAccessCode", {
-        phoneNumber: data.phoneNumber,
-      });
+      await createAccessCode(data.phoneNumber);
       localStorage.setItem("phone", data.phoneNumber);
       setValue("phoneNumber", data.phoneNumber); // Keep phoneNumber when switching steps
       navigate("/verify");

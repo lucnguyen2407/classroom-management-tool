@@ -8,18 +8,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import axios from "axios";
+import type { StudentData } from "@/const";
+import { addStudent } from "@/services/api";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-
-interface StudentData {
-  studentName: string;
-  phoneNumber: string;
-  emailAddress: string;
-  address?: string;
-  dateOfBirth: string;
-}
 
 interface CreateStudentModalProps {
   onStudentCreated?: (studentData: StudentData) => void;
@@ -39,7 +32,7 @@ export default function CreateStudentModal({
 
   const onSubmit = async (data: StudentData) => {
     try {
-      await axios.post("http://localhost:4000/instructor/addStudent", data);
+      await addStudent(data);
       if (onStudentCreated) onStudentCreated(data);
       reset();
       setIsModalOpen(false);

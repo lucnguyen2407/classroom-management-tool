@@ -1,10 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Bell, User, Search, Settings, LogOut } from "lucide-react";
-import { useState, useEffect } from "react";
-import axios from "axios";
 import CreateStudentModal from "@/components/CreateStudent";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,8 +8,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { getInstructorStudents } from "@/services/api";
+import { Bell, LogOut, Search, Settings, User } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getInstructorStudents } from "@/services/api"; // Thêm dòng này
 
 interface Student {
   id: string;
@@ -44,7 +43,6 @@ function InstructorDashboard() {
     emailAddress: string;
     // các trường khác nếu cần
   }) => {
-    // Sau khi thêm mới, gọi lại fetchStudents hoặc thêm vào state nếu muốn realtime
     setStudents((prev) => [
       ...prev,
       {

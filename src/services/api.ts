@@ -1,3 +1,4 @@
+import type { StudentData } from '@/const';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:4000'; // Thay bằng URL thật
@@ -38,3 +39,6 @@ export const del = (url: string, headers = {}) =>
 
 // Lấy danh sách sinh viên cho instructor
 export const getInstructorStudents = () => get('/instructor/students');
+export const addStudent = (data: StudentData) => post('/instructor/addStudent', data);
+export const verifyAccessCode = (data: { phoneNumber: string; code: string }) => post('/auth/verifyAccessCode', data);
+export const createAccessCode = (phoneNumber: string) => post('/auth/createAccessCode', { phoneNumber });
